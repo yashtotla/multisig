@@ -7,7 +7,9 @@ import {BaseAccount} from "account-abstraction/core/BaseAccount.sol";
 import {UserOperation} from "account-abstraction/interfaces/UserOperation.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-contract Wallet is BaseAccount {
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+
+contract Wallet is BaseAccount, Initializable {
     
     using ECDSA for bytes32;
 
@@ -15,9 +17,21 @@ contract Wallet is BaseAccount {
     IEntryPoint private immutable _entryPoint;
     address[] public owners;
 
+    event WalletInitialized(IEntryPoint indexed entryPoint, address[] owners);
+
     constructor(IEntryPoint anEntryPoint, address ourWalletFactory) {
         _entryPoint = anEntryPoint;
         walletFactory = ourWalletFactory;
+    }
+
+    function initialize(address[] memory initialOwners) public initializer {
+        _initialize(initialOwners);
+    }
+
+    function _initialize(address[] memory initialOwners) internal {
+        require(initialOwners.length > 0, "no owners");
+        owners = initialOwners;
+        emit WalletInitialized(_entryPoint, initialOwners);
     }
 
     function entryPoint() public view override returns (IEntryPoint) {
