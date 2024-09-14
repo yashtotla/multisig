@@ -9,7 +9,10 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-contract Wallet is BaseAccount, Initializable {
+import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import {TokenCallbackHandler} from "account-abstraction/samples/callback/TokenCallbackHandler.sol";
+
+contract Wallet is BaseAccount, Initializable, UUPSUpgradeable, TokenCallbackHandler {
     
     using ECDSA for bytes32;
 
@@ -81,4 +84,6 @@ contract Wallet is BaseAccount, Initializable {
         }
         return 0;
     }
+
+    function _authorizeUpgrade(address) internal view override _requireFromEntryPointOrFactory {}
 }
